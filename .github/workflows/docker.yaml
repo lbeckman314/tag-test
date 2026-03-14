@@ -106,19 +106,16 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            # 1. Semver (Only generates version tag, e.g., 0.1.0)
-            type=semver,pattern={{version}},value=${{ github.ref_name }}
+            # Semver
+            type=semver,pattern={{version}},value=${{ github.ref_name }},latest=true
 
-            # 2. Strict Latest (Only for stable semver tags)
-            type=raw,value=latest,enable=${{ github.ref_name != '' && !contains(github.ref_name, '-') && (startsWith(github.ref_name, 'v0.') || startsWith(github.ref_name, 'v1.')) }}
+            # Latest
+            # type=raw,value=latest,enable=${{ github.ref_name != '' && !contains(github.ref_name, '-') && (startsWith(github.ref_name, 'v0.') || startsWith(github.ref_name, 'v1.')) }}
 
-            # 3. Standard Refs (Explicitly no latest)
-            type=ref,event=branch,latest=false
-            type=ref,event=pr,latest=false
-            type=ref,event=tag,latest=false
-
-            # 4. Clean SHA
-            type=sha,prefix=,latest=false
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha,prefix=
 
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
