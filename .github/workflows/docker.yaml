@@ -129,6 +129,8 @@ jobs:
           fi
 
       - name: Setup tmate session
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: mxschmitt/action-tmate@v3
 
       - name: Docker meta
