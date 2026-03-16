@@ -98,6 +98,36 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Decide if this tag matches GitHub Latest release
+        id: latest_gate
+        if: ${{ github.ref_type == 'tag' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Optional: never allow prerelease-style tags to set Docker latest
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          latest_release_tag="$(
+            curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" \
+            | jq -r '.tag_name // empty' \
+            || true
+          )"
+
+          if [[ -n "${latest_release_tag}" && "${GITHUB_REF_NAME}" == "${latest_release_tag}" ]]; then
+            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
@@ -110,7 +140,7 @@ jobs:
             type=semver,pattern={{version}},value=${{ github.ref_name }}
 
             # 2. Strict Latest (Only for stable semver tags)
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-') }}
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' && steps.latest_gate.outputs.is_latest == 'true' }}
 
             # 3. Standard Refs (Explicitly no latest)
             type=ref,event=branch,latest=false
