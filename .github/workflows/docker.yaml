@@ -110,7 +110,7 @@ jobs:
             type=semver,pattern={{version}},value=${{ github.ref_name }}
 
             # 2. Strict Latest (Only for stable semver tags)
-            type=raw,value=latest,enable=${{ github.ref_name != '' && !contains(github.ref_name, '-') && (startsWith(github.ref_name, 'v0.') || startsWith(github.ref_name, 'v1.')) }}
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-') }}
 
             # 3. Standard Refs (Explicitly no latest)
             type=ref,event=branch,latest=false
