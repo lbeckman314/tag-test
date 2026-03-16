@@ -140,6 +140,8 @@ jobs:
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
           fi
 
+          echo "DEBUG: is_latest=${{ steps.latest_gate.outputs.is_latest }}"
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
