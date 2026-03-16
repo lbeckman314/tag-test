@@ -136,11 +136,11 @@ jobs:
 
           if [[ -n "${latest_release_tag}" && "${GITHUB_REF_NAME}" == "${latest_release_tag}" ]]; then
             echo "is_latest=true" >> "$GITHUB_OUTPUT"
+            echo "DEBUG: is_latest=true"
           else
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
+            echo "DEBUG: is_latest=false"
           fi
-
-          echo "DEBUG: is_latest=${{ steps.latest_gate.outputs.is_latest }}"
 
       - name: Docker meta
         id: meta
