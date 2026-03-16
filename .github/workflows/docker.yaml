@@ -110,6 +110,7 @@ jobs:
           # Optional: never allow prerelease-style tags to set Docker latest
           if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
+            echo "DEBUG: Pre-release tag detected, skipping latest assignment..."
             exit 0
           fi
 
@@ -117,21 +118,27 @@ jobs:
             curl -fsSL \
               -H "Authorization: Bearer ${GH_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2026-03-10" \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" \
             | jq -r '.tag_name // empty' \
             || true
           )"
+
+          curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2026-03-10" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" \
+            | jq -r '.tag_name // empty'
+
+          echo "DEBUG: '${latest_release_tag}'"
+          echo "DEBUG: '${GITHUB_REF_NAME}': ${GITHUB_REF_NAME}" 
 
           if [[ -n "${latest_release_tag}" && "${GITHUB_REF_NAME}" == "${latest_release_tag}" ]]; then
             echo "is_latest=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Setup tmate session
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: mxschmitt/action-tmate@v3
 
       - name: Docker meta
         id: meta
