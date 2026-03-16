@@ -128,6 +128,9 @@ jobs:
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
